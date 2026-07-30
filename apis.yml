@@ -1,21 +1,48 @@
 aid: lastminute-com
-name: Lastminute Com
-description: 'Lastminute Com is a company surfaced as a portfolio company of northzone and added to the
-  API Evangelist network as a stub for enrichment. Sector: consumer. This profile is a lead awaiting the
-  enrichment pipeline.'
+name: lastminute.com
+description: 'lastminute.com N.V. (SIX Swiss Exchange: LMN) is a European travel-tech
+  group and the regional leader in dynamic holiday packages, operating an online travel
+  agency portfolio that includes lastminute.com, Volagratis, Rumbo, Bravofly, Weg.de,
+  Jetcost and Hotelscan alongside the Forward media/advertising business. The group
+  sells flights, hotels and packaged travel across a global network, and runs an engineering
+  organisation that publishes an open technology blog and a Stoplight-hosted API portal
+  at developers.lastminute.com. That portal is a real partner-facing API surface, but
+  its projects are not anonymously readable — API reference content sits behind a workspace
+  sign-in, so lastminute.com currently exposes no public OpenAPI, SDK, or self-service
+  developer onboarding path.'
 url: https://raw.githubusercontent.com/api-evangelist/lastminute-com/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
 x-backed-by:
 - northzone
-x-tier: stub
-x-tier-reason: portfolio-lead
+x-tier: profiled
+x-tier-reason: partner-portal-gated
+accessModel:
+  pricing: unknown
+  onboarding: unknown
+  trial: false
+  try_now: false
+  public: false
+  label: Unknown
+  confidence: low
+  source: []
+  generated: '2026-07-22'
+  method: derived
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-19'
+image: https://res.cloudinary.com/lastminute-contenthub/v1/DAM/Logos%20%2B%20fonts/SVG/corporate%20website/lastminute
 tags:
 - Company
 - Consumer
+- Travel
+- Online Travel Agency
+- Flights
+- Hotels
+- Holiday Packages
+- Travel Tech
+- E-Commerce
+- Europe
 apis: []
 maintainers:
 - FN: Kin Lane
@@ -23,5 +50,44 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: DomainSecurity
+  url: security/lastminute-com-domain-security.yml
+- type: LLMsTxt
+  url: llms/lastminute-com-llms.txt
 - type: Website
-  url: http://www.lastminute.com
+  url: https://www.lastminute.com
+- type: DeveloperPortal
+  url: https://developers.lastminute.com/
+- type: Blog
+  url: https://technology.lastminute.com/
+- type: BlogRSS
+  url: https://technology.lastminute.com/rss.xml
+- type: GitHubOrganization
+  url: https://github.com/lastminutedotcom
+- type: TermsOfService
+  url: https://corporate.lastminute.com/terms-and-conditions/
+- type: PrivacyPolicy
+  url: https://corporate.lastminute.com/privacy-policy/
+- type: Company
+  url: https://corporate.lastminute.com/
+- type: About
+  url: https://corporate.lastminute.com/about-us/who-we-are/
+- type: Investors
+  url: https://corporate.lastminute.com/investors/investors-overview/
+- type: Press
+  url: https://corporate.lastminute.com/media-and-news/press-releases/
+- type: Careers
+  url: https://corporate.lastminute.com/careers/jobs/
+- type: Partners
+  url: https://corporate.lastminute.com/about-us/our-partners/
+- type: LinkedIn
+  url: https://www.linkedin.com/company/lastminute.com/
+- type: Instagram
+  url: https://www.instagram.com/lastminute_com/
+- type: Facebook
+  url: https://www.facebook.com/p/lastminutecom-100064403785386/
+x-enrichment:
+  date: '2026-07-19'
+  status: backfilled
+  pass: local-v1
+  note: backfilled from .gitignore signal + verified work evidence
