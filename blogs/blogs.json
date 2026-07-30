@@ -1,0 +1,28 @@
+{
+  "repo": "lastminute-com",
+  "feeds": [
+    {
+      "source": "https://developers.lastminute.com/",
+      "feed_url": "https://developers.lastminute.com/",
+      "title": "",
+      "saved": 0,
+      "method": "none"
+    },
+    {
+      "source": "https://technology.lastminute.com/rss.xml",
+      "feed_url": "https://technology.lastminute.com/rss.xml",
+      "title": "",
+      "saved": 0,
+      "method": "feed"
+    },
+    {
+      "source": "https://technology.lastminute.com/",
+      "feed_url": "https://technology.lastminute.com/rss.xml",
+      "title": "",
+      "saved": 0,
+      "method": "discovered"
+    }
+  ],
+  "post_count": 50,
+  "fetched": "2026-07-25T15:00:33Z"
+}

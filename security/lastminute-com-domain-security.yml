@@ -1,0 +1,38 @@
+generated: '2026-07-19'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml hosts (base probe extended by hand to
+  the developer-portal, corporate and technology hosts)
+hosts:
+- host: www.lastminute.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Sep  7 09:53:25 2026 GMT
+  hsts: null
+  notes: consumer storefront; returns 403 to non-browser clients (bot protection)
+- host: developers.lastminute.com
+  https: true
+  cert_expires: Aug 31 01:11:16 2026 GMT
+  hsts: true
+  hsts_max_age: 31536000
+  hsts_include_subdomains: true
+  notes: Stoplight-hosted API portal
+- host: corporate.lastminute.com
+  https: true
+  cert_expires: Sep  8 20:40:52 2026 GMT
+  hsts: true
+  hsts_max_age: 31536000
+  hsts_include_subdomains: true
+  hsts_preload: true
+  notes: corporate/investor site (WordPress)
+- host: technology.lastminute.com
+  https: true
+  cert_expires: Nov  3 23:59:59 2026 GMT
+  hsts: null
+  notes: engineering blog; no HSTS header observed
+domains:
+- domain: lastminute.com
+  dnssec: false
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: reject
