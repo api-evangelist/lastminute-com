@@ -1,0 +1,36 @@
+generated: '2026-09-11'
+method: probed
+source: https://mcp.lastminute.com/mcp
+status: published
+server:
+  name: lastminute-com
+  transport: http
+  url: https://mcp.lastminute.com/mcp
+deployment:
+  mode: remote
+  endpoint: https://mcp.lastminute.com/mcp
+  verified: probed
+  probe: live
+  checked: '2026-09-11'
+  source: docs-check 2026-09-11 (endpoint found in the provider's own documentation, then probed)
+  probe_why: docs-check
+tools_count: 8
+tools:
+- name: search_flight_and_hotel_package
+  description: ''
+- name: search_only_hotel
+  description: ''
+- name: select_hotel_options
+  description: ''
+- name: get_alternative_flights
+  description: ''
+- name: change_flight
+  description: ''
+- name: generate_booking_link
+  description: ''
+- name: resolve_destination_id
+  description: ''
+- name: search_flights
+  description: ''
+tools_source: live tools/list via initialize handshake, 2026-09-11 (signals/audit_mcp_authorship.py --probe)
+authorship: provider
