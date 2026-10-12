@@ -1,0 +1,20 @@
+generated: '2026-10-12'
+method: none
+source:
+- https://zapier.com/apps/lastminute-com/integrations
+- https://zapier.com/apps/lastminute/integrations
+- https://n8n.io/integrations/lastminute-com/
+- https://n8n.io/integrations/lastminute/
+- https://composio.dev/toolkits/lastminute-com
+- https://monid.ai/tools/lastminute-com
+checked:
+- https://composio.dev/toolkits/lastminute-com
+- https://monid.ai/tools/lastminute-com
+- https://n8n.io/integrations/lastminute-com/
+- https://n8n.io/integrations/lastminute/
+- https://zapier.com/apps/lastminute-com/integrations
+- https://zapier.com/apps/lastminute/integrations
+summary: null
+marketplace_apps: []
+edges: []
+templates: []
