@@ -1,0 +1,458 @@
+{
+  "endpoint": "https://mcp.lastminute.com/mcp",
+  "captured": "2026-10-20",
+  "method": "initialize + tools/list (anonymous, no tool called; roadmap#992)",
+  "protocol_version": "2025-06-18",
+  "server_info": {
+    "name": "MCP_FLIGHT_HDP",
+    "version": "2.13.0.2"
+  },
+  "result": {
+    "tools": [
+      {
+        "name": "search_flight_and_hotel_package",
+        "title": "Search Flight + Hotel Packages",
+        "description": "🛫🏨 Search for COMBINED flight AND hotel vacation packages.\n\nThis tool searches for all-inclusive vacation packages that include:\n- ✈️ Round-trip flights (outbound and return)\n- 🏨 Hotel accommodation for the entire stay\n- 💰 Package pricing (flight + hotel combined)\n\n⚠️ IMPORTANT:\n    This is for PACKAGE deals, NOT separate flight/hotel bookings.\n    Is important to use the correct language in the destination field and keep the original language used in the\n        request made in the user chat.\n\nExample use cases:\n- \"Find me flight and hotel packages from Rome to Madrid\"\n- \"I need a vacation package with flights and hotel from FCO to Barcelona\"\n- \"Search flight+hotel deals from Milan to Paris for 3 nights\"\n\n═══════════════════════════════════════════════════════════════════════════\nHARD CONSTRAINTS\n═══════════════════════════════════════════════════════════════════════════\n\n1. Dates:\n    - start_date MUST be today or later (YYYY-MM-DD)\n    - If user provides past date, ask for valid date BEFORE calling\n\n2. IATA Codes (CRITICAL):\n    - origin and destination MUST be 3-letter IATA codes, NOT city names\n    - NEVER pass city names like \"New York\", \"Geneva\", \"Milan\" - use IATA codes instead\n    - Both CITY codes and AIRPORT codes are accepted:\n        * City codes: NYC, GVA, ZRH, DUB, BRU, VIE, MIL, LON, PAR, BSL\n        * Airport codes: JFK, MXP, FCO, LHR (automatically converted to city codes)\n    - Examples: MXP or MIL for Milan, JFK or NYC for New York, FCO or ROM for Rome\n\nArgs:\n    origin: IATA code only - 3 letters. Use city code (MIL, NYC, LON) or airport code\n        (MXP, JFK, LHR). NEVER use city names like \"Milan\" or \"New York\".\n    destination: IATA code only - 3 letters. Use city code (BCN, PMI) or airport code.\n        NEVER use city names like \"Barcelona\" or \"Palma\".\n    date_from: Check-in date (YYYY-MM-DD). Check this field MUST be today or later.\n    date_to: Check-out date (YYYY-MM-DD). Check this field MUST be today or later.\n    adults: Number of adult travelers. If you want different rooms, set number_adult_room1;number_adult_room2 (default: 2)\n    ⚠️ IMPORTANT:\n    ch_ages: Ages of child travelers. If you want different rooms, set number_chages_room1;number_chages_room2 (default: \"\").\n        If there are two rooms and one is empty the result can be \";number,number\" or \"number,number;\".\n        The user MUST specify ages for each child.\n    lang: Language code (default: \"en\")\n    sort: Sort order for results. Use this when user asks for cheapest, best rated, closest to center, etc.\n        Valid values:\n        - \"recommended\" (default): Multi-factor relevance (price, rating, internal score)\n        - \"price\": Price ascending (cheapest first) - use when user wants \"cheapest\" or \"lowest price\"\n        - \"stars\": Hotel star rating descending (5-star first) - use for \"best hotels\" or \"luxury\"\n        - \"review_score\": Highest review score - use for \"best reviewed\" or \"most popular\"\n        - \"distance\": Closest to city center first - use for \"central\" or \"close to center\"\n    max_results: Maximum number of results to return (default: 5, max: 20)\n    accommodation_type: Filter by accommodation type (optional).\n        CSV of IDs 1-14: 1=Hotels, 2=Resorts, 3=Apartments, 4=Hostels, 5=Motels,\n        6=Country Houses, 7=Guest Houses, 8=B&B, 9=Villas, 10=Boats & Cruises,\n        11=Campsites, 12=Riads, 13=Ryokans, 14=Aparthotels.\n        Example: \"1,2\" for Hotels and Resorts\n    accommodation_facilities: Filter by facilities/amenities (optional).\n        CSV of IDs 0-60. All values are valid. Common examples:\n        0=Free Wi-Fi, 3=Parking, 4=Pool, 6=Spa, 7=Adults Only,\n        9=Seafront, 13=Fitness Center, 25=Golf, 46=Indoor Pool,\n        49=Sauna, 56=Bar, 58=Restaurant.\n        Example: \"0,4,6\" for Free Wi-Fi, Pool, and Spa\n    price: Optional price filter for one-way price per person, as string.\n        Supported formats:\n        - \"300\"      => max price 300 (in the selected currency)\n        - \"200,400\"  => price range between 200 and 400\n        Use only digits and a comma, do NOT include currency symbols.\n        If you invert the order (\"400,200\"), the backend will normalize it to \"200,400\".\n    hotel_stars: Optional filter for hotel star rating, as comma-separated integers.\n        Allowed values: 1,2,3,4,5. Examples:\n        - \"4\"        => only 4-star hotels\n        - \"3,4\"      => 3 or 4 stars\n        - \"3,4,5\"    => 3, 4 or 5 stars\n\nReturns:\n    Dictionary containing search results with flight+hotel packages\n\n═══════════════════════════════════════════════════════════════════════════\nMANDATORY OUTPUT FORMAT\n═══════════════════════════════════════════════════════════════════════════\n\nYou MUST present results as a Markdown table with EXACTLY these columns:\n| # | Photo | Hotel | Stars | Rating | Total Price | Distance from Centre | Amenities |\n\nColumn mapping from response JSON:\n- # → index\n- Photo → [🖼️](hotel.main_image) (clickable link)\n- Hotel → hotel.name\n- Stars → hotel.stars\n- Rating → hotel.rating\n- Total Price → price_total + currency\n- Distance from Centre → hotel.distance_km\n- Amenities → hotel.amenities (max 3, comma-separated)\n\nCRITICAL:\n- You MUST use table format. Do NOT list hotels as bullet points or paragraphs.\n- You MUST display ALL hotels returned in the response. Do NOT truncate or show only a subset.\n- STRICTLY PRESERVE the order of results using the \"index\" field (1, 2, 3...) - NEVER re-sort or reorder\n- The \"#\" column MUST match the \"index\" field from the response (row 1 = index 1, row 2 = index 2, etc.)\n- \"Photo\" column must contain clickable link: [🖼️](hotel.main_image)\n- Do NOT show images after the table, only in the Photo column\n- Amenities: max 3 comma-separated (e.g. \"WiFi, Pool, Spa\")\n- Mark cheapest with 🏆 after hotel name (but keep it in its original position, do NOT move it to first row)\n- Use the SAME LANGUAGE as the user's request for all labels and content\n- Hide internal IDs from the user\n- The user expects a comparison table they can scan quickly with ALL available options.\n\nExample correct output:\n| # | Photo | Hotel | Stars | Rating | Total Price | Distance from Centre | Amenities |\n|---|-------|-------|-------|--------|-------------|----------------------|-----------|\n| 1 | [🖼️](https://...) | Grand Hotel 🏆 | ⭐⭐⭐⭐ | 8.5 | EUR 450.00 | 0.5 km | WiFi, Pool, Spa |\n| 2 | [🖼️](https://...) | Beach Resort | ⭐⭐⭐⭐⭐ | 9.1 | EUR 680.00 | 1.2 km | WiFi, Pool, Bar |",
+        "inputSchema": {
+          "properties": {
+            "origin": {
+              "type": "string"
+            },
+            "destination": {
+              "type": "string"
+            },
+            "date_from": {
+              "type": "string"
+            },
+            "date_to": {
+              "type": "string"
+            },
+            "adults": {
+              "default": "1",
+              "type": "string"
+            },
+            "ch_ages": {
+              "default": "",
+              "type": "string"
+            },
+            "lang": {
+              "default": "en",
+              "type": "string"
+            },
+            "sort": {
+              "default": "recommended",
+              "type": "string"
+            },
+            "max_results": {
+              "default": 5,
+              "type": "integer"
+            },
+            "accommodation_type": {
+              "default": "",
+              "type": "string"
+            },
+            "accommodation_facilities": {
+              "default": "",
+              "type": "string"
+            },
+            "price": {
+              "default": "",
+              "type": "string"
+            },
+            "hotel_stars": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          "required": [
+            "origin",
+            "destination",
+            "date_from",
+            "date_to"
+          ],
+          "type": "object"
+        },
+        "outputSchema": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "annotations": {
+          "title": "Search Flight + Hotel Packages",
+          "readOnlyHint": true,
+          "destructiveHint": false
+        },
+        "_meta": {
+          "_fastmcp": {
+            "tags": []
+          }
+        }
+      },
+      {
+        "name": "search_only_hotel",
+        "title": "Search Hotels",
+        "description": "Search for hotel-only stays (no flights included).\n⚠️ IMPORTANT:\n    This is for hotel-only searches. Flight bookings are not included.\n\n═══════════════════════════════════════════════════════════════════════════\nMANDATORY PRE-STEP: DESTINATION RESOLUTION\n═══════════════════════════════════════════════════════════════════════════\n\nBefore calling this tool, you MUST silently call resolve_destination_id to\nresolve the city name to its internal numeric ID. Do NOT inform the user\nabout this step.\n\nWorkflow:\n1. User provides a city name (e.g. \"London\", \"Madrid\")\n2. Silently call resolve_destination_id(lang=<lang>, city_name=<city>)\n3a. If success=true → use the returned \"id\" (e.g. \"141660\") as the\n    destination field for this tool.\n3b. If success=false → show the user the \"suggestions\" list (name + country)\n    and ask them to clarify which city they mean. Do NOT call this tool yet.\n\nThe destination field accepts:\n- A numeric ID string from resolve_destination_id (e.g. \"141660\") ← preferred\n- A 3-letter IATA code as fallback (e.g. \"MAD\", \"LON\") when the user\n  explicitly provides one and no resolution is needed.\n\n═══════════════════════════════════════════════════════════════════════════\nHARD CONSTRAINTS\n═══════════════════════════════════════════════════════════════════════════\n\n1. Dates:\n    - start_date MUST be today or later (YYYY-MM-DD)\n    - If user provides past date, ask for valid date BEFORE calling\n\n2. Destination (CRITICAL):\n    - Always prefer the numeric ID from resolve_destination_id\n    - If using IATA fallback: must be 3-letter code (MAD, PAR, MIL, LON)\n    - NEVER pass raw city names like \"Madrid\" or \"Paris\" directly\n\nExample use cases:\n- \"Find me a hotel in Madrid for 3 nights\" → resolve \"Madrid\" first → use id\n- \"Search hotel in London\" → resolve \"London\" first → use id\n\nArgs:\n    destination: Numeric destination ID from resolve_destination_id (e.g. \"141660\"),\n        or 3-letter IATA code (e.g. \"MAD\") as fallback.\n    date_from: Check-in date (YYYY-MM-DD). Check this field MUST be today or later.\n    date_to: Check-out date (YYYY-MM-DD). Check this field MUST be today or later.\n    adults: Number of adult travelers. If you want different rooms, set number_adult_room1;number_adult_room2 (default: 2)\n    ch_ages: Ages of child travelers. If you want different rooms, set number_chages_room1;number_chages_room2 (default: \"\").\n        If there are two rooms and one is empty the result can be \";number,number\" or \"number,number;\".\n        The user MUST specify ages for each child.\n    lang: Language code (default: \"en\")\n    sort: Sort order for results. Use this when user asks for cheapest, best rated, closest to center, etc.\n        Valid values:\n        - \"recommended\" (default): Multi-factor relevance (price, rating, internal score)\n        - \"price\": Price ascending (cheapest first) - use when user wants \"cheapest\" or \"lowest price\"\n        - \"stars\": Hotel star rating descending (5-star first) - use for \"best hotels\" or \"luxury\"\n        - \"review_score\": Highest review score - use for \"best reviewed\" or \"most popular\"\n        - \"distance\": Closest to city center first - use for \"central\" or \"close to center\"\n    max_results: Maximum number of results to return (default: 5, max: 20)\n    accommodation_type: Filter by accommodation type (optional).\n        CSV of IDs 1-14: 1=Hotels, 2=Resorts, 3=Apartments, 4=Hostels, 5=Motels,\n        6=Country Houses, 7=Guest Houses, 8=B&B, 9=Villas, 10=Boats & Cruises,\n        11=Campsites, 12=Riads, 13=Ryokans, 14=Aparthotels.\n        Example: \"1,2\" for Hotels and Resorts\n    accommodation_facilities: Filter by facilities/amenities (optional).\n        CSV of IDs 0-60. Examples: 0=Free Wi-Fi, 4=Pool, 6=Spa, 7=Adults Only,\n        9=Seafront, 25=Golf, 46=Indoor Pool, 56=Bar, 58=Restaurant.\n        Example: \"0,4,6\" for Free Wi-Fi, Pool, and Spa\n    price: Optional price filter for one-way price per person, as string.\n        Supported formats:\n        - \"300\"      => max price 300 (in the selected currency)\n        - \"200,400\"  => price range between 200 and 400\n        Use only digits and a comma, do NOT include currency symbols.\n        If you invert the order (\"400,200\"), the backend will normalize it to \"200,400\".\n    hotel_stars: Optional filter for hotel star rating, as comma-separated integers.\n        Allowed values: 1,2,3,4,5. Examples:\n        - \"4\"        => only 4-star hotels\n        - \"3,4\"      => 3 or 4 stars\n        - \"3,4,5\"    => 3, 4 or 5 stars\n\nReturns:\n    Dictionary containing search results with hotel results.\n\n═══════════════════════════════════════════════════════════════════════════\nMANDATORY OUTPUT FORMAT\n═══════════════════════════════════════════════════════════════════════════\n\nYou MUST present results as a Markdown table with EXACTLY these columns:\n| # | Photo | Hotel | Stars | Rating | Total Price | Distance from Centre | Amenities |\n\nColumn mapping from response JSON:\n- # → index\n- Photo → [🖼️](hotel.main_image) (clickable link)\n- Hotel → hotel.name\n- Stars → hotel.stars\n- Rating → hotel.rating\n- Total Price → price_total + currency\n- Distance from Centre → hotel.distance_km\n- Amenities → hotel.amenities (max 3, comma-separated)\n\nCRITICAL:\n- You MUST use table format. Do NOT list hotels as bullet points or paragraphs.\n- You MUST display ALL hotels returned in the response. Do NOT truncate or show only a subset.\n- STRICTLY PRESERVE the order of results using the \"index\" field (1, 2, 3...) - NEVER re-sort or reorder\n- The \"#\" column MUST match the \"index\" field from the response (row 1 = index 1, row 2 = index 2, etc.)\n- \"Photo\" column must contain clickable link: [🖼️](hotel.main_image)\n- Do NOT show images after the table, only in the Photo column\n- Amenities: max 3 comma-separated (e.g. \"WiFi, Pool, Spa\")\n- Mark cheapest with 🏆 after hotel name (but keep it in its original position, do NOT move it to first row)\n- Use the SAME LANGUAGE as the user's request for all labels and content\n- Hide internal IDs from the user\n- The user expects a comparison table they can scan quickly with ALL available options.\n\nExample correct output:\n| # | Photo | Hotel | Stars | Rating | Total Price | Distance from Centre | Amenities |\n|---|-------|-------|-------|--------|-------------|----------------------|-----------|\n| 1 | [🖼️](https://...) | Grand Hotel 🏆 | ⭐⭐⭐⭐ | 8.5 | EUR 450.00 | 0.5 km | WiFi, Pool, Spa |\n| 2 | [🖼️](https://...) | Beach Resort | ⭐⭐⭐⭐⭐ | 9.1 | EUR 680.00 | 1.2 km | WiFi, Pool, Bar |",
+        "inputSchema": {
+          "properties": {
+            "destination": {
+              "type": "string"
+            },
+            "date_from": {
+              "type": "string"
+            },
+            "date_to": {
+              "type": "string"
+            },
+            "adults": {
+              "default": "1",
+              "type": "string"
+            },
+            "ch_ages": {
+              "default": "",
+              "type": "string"
+            },
+            "lang": {
+              "default": "en",
+              "type": "string"
+            },
+            "sort": {
+              "default": "recommended",
+              "type": "string"
+            },
+            "max_results": {
+              "default": 5,
+              "type": "integer"
+            },
+            "accommodation_type": {
+              "default": "",
+              "type": "string"
+            },
+            "accommodation_facilities": {
+              "default": "",
+              "type": "string"
+            },
+            "price": {
+              "default": "",
+              "type": "string"
+            },
+            "hotel_stars": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          "required": [
+            "destination",
+            "date_from",
+            "date_to"
+          ],
+          "type": "object"
+        },
+        "outputSchema": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "annotations": {
+          "title": "Search Hotels",
+          "readOnlyHint": true,
+          "destructiveHint": false
+        },
+        "_meta": {
+          "_fastmcp": {
+            "tags": []
+          }
+        }
+      },
+      {
+        "name": "select_hotel_options",
+        "title": "Get Hotel Room Options",
+        "description": "Get detailed options for a specific hotel after initial search.\n\nThis tool automatically uses the same number of adults, children, currency,\nand business profile from the original search to ensure consistency.\n\nArgs:\n    search_id: The search ID from the previous flight+hotel search or only hotel search\n    hotel_internal_id: The internal hotel ID from the search results (internal_id_hotel)\n    date_from: Check-in date (YYYY-MM-DD)\n    date_to: Check-out date (YYYY-MM-DD)\n\nReturns:\n    Dictionary containing detailed hotel options, room types, and rates\n\nOUTPUT FORMAT: Use structured sections with emoji headers (🏨✈️🛏️📸).\n1) Hotel info: name, stars, address, check-in/out, hdp_mcp, photos (inline links)\n2) Flights: if present, show outbound/return with carrier, times, duration\n3) Rooms table: | Room | Total Price | Cancellation | Availability |\n   - Sort by price, mark cheapest with ⭐\n   - Simplify cancellation policy\nUse the SAME LANGUAGE as the user's request for all labels and content.\nHide internal IDs (rate_id kept for booking but not shown in the display).",
+        "inputSchema": {
+          "properties": {
+            "search_id": {
+              "type": "integer"
+            },
+            "hotel_internal_id": {
+              "type": "integer"
+            },
+            "date_from": {
+              "type": "string"
+            },
+            "date_to": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "search_id",
+            "hotel_internal_id",
+            "date_from",
+            "date_to"
+          ],
+          "type": "object"
+        },
+        "outputSchema": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "annotations": {
+          "title": "Get Hotel Room Options",
+          "readOnlyHint": true,
+          "destructiveHint": false
+        },
+        "_meta": {
+          "_fastmcp": {
+            "tags": []
+          }
+        }
+      },
+      {
+        "name": "get_alternative_flights",
+        "title": "Get Alternative Flights",
+        "description": "Get alternative flight options for an existing hotel selection.\n\nInput parameters:\n- pricing_id (string, REQUIRED): pricing ID returned by select_hotel_options.\n\nBehavior:\n- Can ONLY be used AFTER select_hotel_options.\n- Returns a list of alternative flights with their details and prices.\n- On success, alternative flight options are also stored in session\n  for later use by change_flight.\n- Don't touch the order of the proposed flights, return them as received from the backend.",
+        "inputSchema": {
+          "properties": {
+            "pricing_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "pricing_id"
+          ],
+          "type": "object"
+        },
+        "outputSchema": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "annotations": {
+          "title": "Get Alternative Flights",
+          "readOnlyHint": true,
+          "destructiveHint": false
+        },
+        "_meta": {
+          "_fastmcp": {
+            "tags": []
+          }
+        }
+      },
+      {
+        "name": "change_flight",
+        "title": "Change Flight Selection",
+        "description": "Change the flight for an existing hotel selection.\n\nThis tool updates the flight associated with your hotel booking after viewing alternatives.\n\n⚠️ IMPORTANT:\n    - Must be used AFTER get_alternative_flights to see available options\n    - Requires both pricing_id and the new_transport_id from the alternatives list\n    - This will update the total package price based on the new flight selection\n\nExample use cases:\n- \"Change to flight option 2\"\n- \"Select the morning flight instead\"\n- \"Update to the cheaper flight option\"\n\nArgs:\n    pricing_id: The pricing ID from select_hotel_options response\n    new_transport_id: The transport ID of the selected alternative flight\n        (from get_alternative_flights response)\n\nReturns:\n    Dictionary confirming the flight change with updated package details",
+        "inputSchema": {
+          "properties": {
+            "pricing_id": {
+              "type": "string"
+            },
+            "new_transport_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "pricing_id",
+            "new_transport_id"
+          ],
+          "type": "object"
+        },
+        "outputSchema": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "annotations": {
+          "title": "Change Flight Selection",
+          "readOnlyHint": false,
+          "destructiveHint": false
+        },
+        "_meta": {
+          "_fastmcp": {
+            "tags": []
+          }
+        }
+      },
+      {
+        "name": "generate_booking_link",
+        "title": "Generate Booking Link",
+        "description": "Generate a direct booking URL for the selected hotel room option.\n\nAfter change_flight, rate_id values change but the internalIdRoom stays the same.\nThis tool automatically maps old rate_id to new rate_id based on internalIdRoom only.\n\nArgs:\n    pricing_id: The pricing ID from select_hotel_options response (NOT search_id)\n    rate_id: The rate ID of the selected room option (from select_hotel_options response)\n\nReturns:\n    Dictionary containing the booking URL and summary details",
+        "inputSchema": {
+          "properties": {
+            "pricing_id": {
+              "type": "string"
+            },
+            "rate_id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "pricing_id",
+            "rate_id"
+          ],
+          "type": "object"
+        },
+        "outputSchema": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "annotations": {
+          "title": "Generate Booking Link",
+          "readOnlyHint": true,
+          "destructiveHint": false
+        },
+        "_meta": {
+          "_fastmcp": {
+            "tags": []
+          }
+        }
+      },
+      {
+        "name": "resolve_destination_id",
+        "title": "Resolve Destination ID",
+        "description": "Resolve a city name to its internal destination ID using the lastminute.com hints API.\n\nThis tool is useful when you need to map a free-text city name to a structured\ndestination identifier before performing a hotel or package search.\n\nSupported languages: IT, EN, ES, FR, DE, PL, SE, DK, NO, FI.\nAny unsupported language falls back to English (en-GB).\n\nArgs:\n    lang: 2-letter language code (e.g. \"en\", \"it\", \"fr\"). Case-insensitive.\n    city_name: The city name to resolve (e.g. \"London\", \"Roma\", \"Paris\").\n\nReturns:\n    On exact match:\n        {\n            \"success\": true,\n            \"id\": \"<destination_id>\",\n            \"name\": \"<matched city name>\",\n            \"country\": \"<country name>\",\n            \"country_code\": \"<ISO2 code>\"\n        }\n    On no exact match (returns all City-type suggestions):\n        {\n            \"success\": false,\n            \"message\": \"No exact match found. Suggestions returned.\",\n            \"suggestions\": [\n                {\n                    \"id\": \"...\",\n                    \"name\": \"...\",\n                    \"country\": \"...\",\n                    \"country_code\": \"...\",\n                },\n                ...\n            ]\n        }\n    On API error:\n        {\n            \"success\": false,\n            \"error\": \"<error description>\"\n        }",
+        "inputSchema": {
+          "properties": {
+            "lang": {
+              "type": "string"
+            },
+            "city_name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "lang",
+            "city_name"
+          ],
+          "type": "object"
+        },
+        "outputSchema": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "annotations": {
+          "title": "Resolve Destination ID",
+          "readOnlyHint": true,
+          "destructiveHint": false
+        },
+        "_meta": {
+          "_fastmcp": {
+            "tags": []
+          }
+        }
+      },
+      {
+        "name": "search_flights",
+        "title": "Search Flights",
+        "description": "    Search for flights and return available options.\n\n    Returns flights table with: airline, route, times, duration, stops, price, booking link.\n\n    ═══════════════════════════════════════════════════════════════════════════\n    SEARCH MODES (mutually exclusive)\n    ═══════════════════════════════════════════════════════════════════════════\n\n    1. DEFAULT MODE (no filters, no ranking):\n       Returns max_results flights sorted by PRICE (cheapest first).\n       Use for: \"find flights\", \"cheapest flights\"\n\n    2. FILTER MODE (any filter parameter specified):\n       Searches 100 flights, applies filters server-side, returns max_results.\n       Filters: time ranges, price limits, airports, stops, airlines, duration.\n       Results sorted by PRICE after filtering.\n       Use for: \"morning flights\", \"under 200 EUR\", \"direct only\", \"from MXP\"\n\n    3. RANKING MODE (ranking_best=True):\n       Searches ALL flights, applies smart ranking (price + duration + stops).\n       Returns top max_results by overall value.\n       Use for: \"best flights\", \"recommended flights\"\n       ⚠️ MUTUALLY EXCLUSIVE with filters\n\n    ═══════════════════════════════════════════════════════════════════════════\n    FILTER PARAMETERS (optional, applied server-side)\n    ═══════════════════════════════════════════════════════════════════════════\n\n    Time filters (HH:MM format):\n    - departure_time_start / departure_time_end: e.g., \"06:00\" to \"12:00\" for morning\n    - arrival_time_start / arrival_time_end: e.g., \"18:00\" to \"23:59\" for evening arrival\n\n    Price filters (in cents):\n    - min_price_cents: minimum price (e.g., 5000 = 50 EUR)\n    - max_price_cents: maximum price (e.g., 20000 = 200 EUR)\n\n    Airport filters (comma-separated IATA codes):\n    - departure_airports: \"MXP,LIN\" = only from Malpensa or Linate\n    - arrival_airports: \"LHR,LGW\" = only to Heathrow or Gatwick\n\n    Connection filters:\n    - max_stops: 0 = direct only, 1 = max 1 stop\n\n    Airline filters (comma-separated IATA codes):\n    - airlines_include: \"FR,U2\" = only Ryanair or easyJet (whitelist)\n    - airlines_exclude: \"FR\" = exclude Ryanair (blacklist)\n\n    Duration filter:\n    - max_duration_minutes: e.g., 180 = max 3 hours\n\n    Examples:\n    - Morning direct flights under 150 EUR:\n      departure_time_start=\"06:00\", departure_time_end=\"12:00\", max_stops=0, max_price_cents=15000\n\n    - Flights from Malpensa only, max 2 hours:\n      departure_airports=\"MXP\", max_duration_minutes=120\n\n    ═══════════════════════════════════════════════════════════════════════════\n    HARD CONSTRAINTS\n    ═══════════════════════════════════════════════════════════════════════════\n\n    1. Dates:\n       - start_date MUST be today or later (YYYY-MM-DD)\n       - If roundtrip: end_date >= start_date\n       - If user provides past date, ask for valid date BEFORE calling\n\n    2. Price display (legal):\n       - Display 'price' text EXACTLY as returned, character-by-character\n       - Do NOT modify, reformat, or recalculate\n       - Preserve newlines (\n) if present\n\n    3. Deeplink (booking):\n       - The last column header is provided in 'table_headers' (localized: \"Book\", \"Prenota\", \"Reservar\", etc.)\n       - Use that label as column name AND as the clickable link text for 'deeplink' URLs\n       - Do NOT modify URL\n       - Add after table a localized call-to-action using the same booking verb\n\n    4. Neutral tone:\n       - Present comparison table only\n       - No rankings, opinions, or \"best/cheapest\" commentary\n\n    5. Ranking offer:\n       - After price-sorted results, always ask:\n         **\"Would you like me to re-sort by 'recommended' (best overall value)?\"**\n       - If confirmed, call with ranking_best=True\n\n    ═══════════════════════════════════════════════════════════════════════════\n    INPUT PARAMETERS\n    ═══════════════════════════════════════════════════════════════════════════\n\n    Required:\n    - departure (str): IATA code (e.g., \"MIL\", \"MXP\")\n    - arrival (str): IATA code (e.g., \"LON\", \"JFK\")\n    - start_date (str): YYYY-MM-DD (>= today)\n\n    Optional:\n    - end_date (str): YYYY-MM-DD for roundtrip\n    - adults (int): >= 1 (default: 1)\n    - children_ages (str): comma-separated ages 2-11 (e.g., \"3,8\")\n    - infants_ages (str): comma-separated ages 0-1 (e.g., \"0,1\")\n    - language (str): en/it/es/fr/de/nl/pl/se/dk/no/fi/pt/hu/cs/ro/el (auto-detected if None)\n    - flight_class (str): ECONOMY/PREMIUM_ECONOMY/BUSINESS/FIRST_CLASS\n    - max_results (int): 1-20, default 10\n    - ranking_best (bool): True for smart ranking (default: False)\n\n    Filters (all optional, see FILTER PARAMETERS section above):\n    - departure_time_start, departure_time_end\n    - arrival_time_start, arrival_time_end\n    - min_price_cents, max_price_cents\n    - departure_airports, arrival_airports\n    - max_stops\n    - airlines_include, airlines_exclude\n    - max_duration_minutes\n\n    ⚠️ ranking_best and filters are MUTUALLY EXCLUSIVE\n\n    ═══════════════════════════════════════════════════════════════════════════\n    RETURN SHAPE\n    ═══════════════════════════════════════════════════════════════════════════\n\n    {\n      \"flights\": [\n        {\n          \"flight_number\": 1,\n          \"airline\": \"Airline Name + Flight #\",\n          \"departure\": \"AAA HH:MM\" (or \"outbound\" for RT),\n          \"arrival\": \"BBB HH:MM\" (or \"return\" for RT),\n          \"duration\": \"125 min\",\n          \"stops\": \"Direct\" or \"1 stop\" (localized),\n          \"price\": \"exact formatted text (preserve as-is)\",\n          \"price_format\": \"single\" | \"multiline\",\n          \"deeplink\": \"full booking URL\",\n          \"price_amount\": numeric cents (for reference)\n        }\n      ],\n      \"total_results\": int,\n      \"total_raw_results\": int,\n      \"filtered_non_air\": int (trains excluded),\n      \"currency\": str,\n      \"language\": str,\n      \"is_roundtrip\": bool,\n      \"requested_count\": int\n    }\n\n    TABLE FORMAT: Use 'table_headers' from response as column names (already localized).\n    The last column is the booking link (e.g. \"Book\", \"Prenota\", \"Reservar\", \"Réserver\", \"Buchen\").\n    Render each deeplink as [localized_label](url). Display ALL flights in the response.\n    ",
+        "inputSchema": {
+          "properties": {
+            "departure": {
+              "type": "string"
+            },
+            "arrival": {
+              "type": "string"
+            },
+            "start_date": {
+              "type": "string"
+            },
+            "end_date": {
+              "default": "",
+              "type": "string"
+            },
+            "adults": {
+              "default": 1,
+              "type": "integer"
+            },
+            "children_ages": {
+              "default": "",
+              "type": "string"
+            },
+            "infants_ages": {
+              "default": "",
+              "type": "string"
+            },
+            "language": {
+              "default": "",
+              "type": "string"
+            },
+            "flight_class": {
+              "default": "",
+              "type": "string"
+            },
+            "max_results": {
+              "default": 10,
+              "type": "integer"
+            },
+            "ranking_best": {
+              "default": false,
+              "type": "boolean"
+            },
+            "departure_time_start": {
+              "default": "",
+              "type": "string"
+            },
+            "departure_time_end": {
+              "default": "",
+              "type": "string"
+            },
+            "arrival_time_start": {
+              "default": "",
+              "type": "string"
+            },
+            "arrival_time_end": {
+              "default": "",
+              "type": "string"
+            },
+            "min_price_cents": {
+              "default": "",
+              "type": "string"
+            },
+            "max_price_cents": {
+              "default": "",
+              "type": "string"
+            },
+            "departure_airports": {
+              "default": "",
+              "type": "string"
+            },
+            "arrival_airports": {
+              "default": "",
+              "type": "string"
+            },
+            "max_stops": {
+              "default": "",
+              "type": "string"
+            },
+            "airlines_include": {
+              "default": "",
+              "type": "string"
+            },
+            "airlines_exclude": {
+              "default": "",
+              "type": "string"
+            },
+            "max_duration_minutes": {
+              "default": "",
+              "type": "string"
+            }
+          },
+          "required": [
+            "departure",
+            "arrival",
+            "start_date"
+          ],
+          "type": "object"
+        },
+        "outputSchema": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "annotations": {
+          "title": "Search Flights",
+          "readOnlyHint": true,
+          "destructiveHint": false
+        },
+        "_meta": {
+          "_fastmcp": {
+            "tags": []
+          }
+        }
+      }
+    ]
+  }
+}
