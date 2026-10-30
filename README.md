@@ -64,40 +64,91 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-lastminute.com N.V. (SIX Swiss Exchange: LMN) is a European travel-tech group and the
-regional leader in dynamic holiday packages, operating an online travel agency portfolio
-that includes lastminute.com, Volagratis, Rumbo, Bravofly, Weg.de, Jetcost and Hotelscan
-alongside the Forward media/advertising business.
+lastminute.com N.V. (SIX Swiss Exchange: LMN) is a European travel-tech group and the regional leader in dynamic holiday packages, operating an online travel agency portfolio that includes lastminute.com, Volagratis, Rumbo, Bravofly, Weg.de, Jetcost and Hotelscan alongside the Forward media/advertising business. The group sells flights, hotels and packaged travel across a global network, and runs an engineering organisation that publishes an open technology blog and a Stoplight-hosted API portal at developers.lastminute.com. That portal is a real partner-facing API surface, but its projects are not anonymously readable — API reference content sits behind a workspace sign-in, so lastminute.com currently exposes no public OpenAPI, SDK, or self-service developer onboarding path.
 
-## API surface
+**Areas:** Company · Consumer · Travel · Online Travel Agency · Flights · Hotels · Holiday Packages · Travel Tech · E-Commerce · Europe
 
-lastminute.com runs a real partner-facing API portal at
-[developers.lastminute.com](https://developers.lastminute.com/) — a Stoplight workspace
-branded "lmn API Portal" (`lmnuserexperience`, created 2023-08, last updated 2025-07).
-The portal is publicly reachable, but **no project in the workspace is anonymously
-readable**: the workspace has no public projects, and `/docs` returns 404. API reference
-content therefore sits behind a sign-in and is a partner/private surface, not a
-self-service developer program.
+## lastminute.com on APIs.io
 
-As of 2026-07-19 the enrichment pipeline found **no** publicly retrievable OpenAPI,
-AsyncAPI or GraphQL description, no first-party SDK on any public package registry,
-no CLI, no MCP server, no public Postman collection, no status page, no changelog, no
-API pricing or sign-up path, no `/.well-known/` document of any kind (including
-security.txt), no vulnerability disclosure program and no trust center.
+Everything profiled for lastminute.com is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/lastminute-com/](https://apis.io/providers/lastminute-com/)** — or go straight to one of the APIs or properties below.
 
-The public [GitHub organization](https://github.com/lastminutedotcom) has 10 repositories,
-all engineering samples and internal tooling — no client libraries.
+### Published properties
 
-The [technology blog](https://technology.lastminute.com/) is active and substantive,
-including the "Our Tech Ecosystem" series covering architecture, Kafka and DDD, the
-Java/Kotlin/Spring Boot and React/TypeScript/Next.js stack, Kubernetes DevOps and
-observability, and data/ML.
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-## Artifacts
+#### MCP servers (1)
 
-- `security/lastminute-com-domain-security.yml` — TLS/HSTS/DNS probe across four hosts
-  (SPF and DMARC `p=reject` present; no DNSSEC, no CAA)
-- `well-known/lastminute-com-well-known.yml` — negative `/.well-known/` probe record
-- `llms/lastminute-com-llms.txt` — generated catalog summary
+Model Context Protocol servers that expose the API to agents.
 
-Backed by: northzone — https://www.lastminute.com
+- [lastminute-com](https://apis.io/servers/lastminute-com/lastminute-com/)
+
+#### Security (1)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Lastminute Com Domain Security](https://apis.io/security/lastminute-com/lastminute-com-domain-security/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.lastminute.com)
+- [Blog](https://technology.lastminute.com/)
+- [Terms of service](https://corporate.lastminute.com/terms-and-conditions/)
+- [Privacy policy](https://corporate.lastminute.com/privacy-policy/)
+- [GitHub](https://github.com/lastminutedotcom)
+
+## API Evangelist rating
+
+**Kin Score 12.6** — emerging · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 59.2 |
+| Contract quality | 0.0 |
+| Contract governance | 0.0 |
+| Operational transparency | 2.6 |
+| Developer ergonomics | 11.9 |
+| Access clarity | 21.1 |
+
+**Agent readiness 8.6** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | — |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | verified |
+| Auth Clarity | — |
+| Idempotency | — |
+| Error Semantics | — |
+| OpenAPI Examples | — |
+| Rate Limit Signal | — |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
+
+**Regulatory alignment 13.7** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/lastminute-com/](https://apis.io/providers/lastminute-com/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for lastminute.com: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/lastminute-com/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
